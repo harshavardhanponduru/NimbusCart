@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>NimbusCart - Product Catalog</title>
+  <style>
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; margin: 40px; background: #f4f6f8; }
+    .container { max-width: 800px; margin: auto; background: #fff; padding: 25px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+    h1, h2 { color: #1a202c; }
+    table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+    th, td { border: 1px solid #e2e8f0; padding: 10px 14px; text-align: left; }
+    th { background: #edf2f7; }
+    .form-group { margin-bottom: 12px; }
+    label { display: block; margin-bottom: 4px; font-weight: 600; }
+    input { width: 100%; padding: 8px; box-sizing: border-box; border: 1px solid #cbd5e0; border-radius: 4px; }
+    button { background: #3182ce; color: #fff; padding: 10px 16px; border: none; border-radius: 4px; cursor: pointer; font-weight: 600; }
+    button:hover { background: #2b6cb0; }
+    .error { background: #fed7d7; color: #9b2c2c; padding: 12px; border-radius: 4px; margin-bottom: 15px; display: none; }
+  </style>
+</head>
+<body>
+<div class="container">
+  <h1>NimbusCart Product Catalog</h1>
+  <div id="error-box" class="error"></div>
+
+  <h2>Add Product</h2>
+  <form id="product-form">
+    <div class="form-group">
+      <label for="name">Product Name</label>
+      <input type="text" id="name" required>
+    </div>
+    <div class="form-group">
+      <label for="price">Price ($)</label>
+      <input type="number" id="price" step="0.01" required>
+    </div>
+    <div class="form-group">
+      <label for="stock">Stock Quantity</label>
+      <input type="number" id="stock" required>
+    </div>
+    <button type="submit">Add Product</button>
+  </form>
+
+  <h2>Available Products</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Name</th>
+        <th>Price ($)</th>
+        <th>Stock</th>
+      </tr>
+    </thead>
+    <tbody id="product-table-body"></tbody>
+  </table>
+</div>
+
+<script>
+  const errorBox = document.getElementById('error-box');
+  const tableBody = document.getElementById('product-table-body');
+  const form = document.getElementById('product-form');
+
+  function showError(msg) {
+    errorBox.textContent = msg;
+    errorBox.style.display = 'block';
+  }
+
+  function clearError() {
+    errorBox.textContent = '';
+    errorBox.style.display = 'none';
+  }
+
+  async function fetchProducts() {
+    clearError();
+    try {
+      const res = await fetch('/api/items');
+      if (!res.ok) throw new Error(`HTTP Error: ${res.status}`);
+      const data = await res.json();
+      tableBody.innerHTML = '';
+      data.forEach(item => {
+        const row = `<tr><td>${item.id}</td><td>${item.name}</td><td>${item.price}</td><td>${item.stock}</td></tr>`;
+        tableBody.innerHTML += row;
+      });
+    } catch (err) {
+      showError(`Failed to load items: ${err.message}`);
+    }
+  }
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    clearError();
+    const payload = {
+      name: document.getElementById('name').value,
+      price: parseFloat(document.getElementById('price').value),
+      stock: parseInt(document.getElementById('stock').value, 10)
+    };
+
+    try {
+      const res = await fetch('/api/items', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      if (!res.ok) throw new Error(`HTTP Error: ${res.status}`);
+      form.reset();
+      await fetchProducts();
+    } catch (err) {
+      showError(`Failed to add product: ${err.message}`);
+    }
+  });
+
+  window.onload = fetchProducts;
+</script>
+</body>
+</html>
