@@ -743,17 +743,4 @@ If this repository is intended for public distribution, add an appropriate `LICE
 
 ## Author
 
-**NimbusCart**
-
-A cloud infrastructure and full-stack application project demonstrating:
-
-* AWS networking
-* Terraform Infrastructure as Code
-* Docker containerization
-* VPC isolation
-* VPC Peering
-* NAT Gateway routing
-* Private RDS deployment
-* Nginx reverse proxying
-* REST API development
-* Automated infrastructure deployment
+**Harshavardhan**
